@@ -17,5 +17,8 @@
     },
     "lint-staged": {
         "**/*": "prettier --write --ignore-unknown"
+    },
+    "dependencies": {
+        "fast-decode-uri-component": "^1.0.1"
     }
 }
