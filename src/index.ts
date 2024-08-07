@@ -1,8 +1,11 @@
 import type { MNyxor } from './types';
 import { parseQuery, parseCookies } from './utils';
+import { version as _version } from '../package.json';
 
 export class Nyxor {
-    server: MNyxor.TServer | null = null;
+    version = _version;
+    private server: MNyxor.TServer | null = null;
+    private routers: MNyxor.IRouter[] = [];
     private options: MNyxor.INyxorOptions = {
         port: 8888,
         hostname: '0.0.0.0',
@@ -19,7 +22,7 @@ export class Nyxor {
             port: this.options.port,
             hostname: this.options.hostname,
             tls: this.options.https,
-            fetch: async (request, server) => {
+            fetch: async request => {
                 const body = await this.createReqBody(request);
                 const params = await this.createReqParams(request);
                 const query = await this.createReqQuery(request);
@@ -107,29 +110,58 @@ export class Nyxor {
         const cookies = parseCookies(req.headers.get('cookie') || '');
         return cookies;
     };
+    /** 添加路由 */
+    private addRouter = (
+        method: keyof MNyxor.IRequestMethods,
+        path: string,
+        handler: (ctx: MNyxor.ICtx) => any
+    ) => {
+        this.routers.push({
+            path,
+            method,
+            handler,
+        });
+    };
 
-    use(plugin: (ctx: Nyxor) => any) {
+    use = (plugin: (ctx: Nyxor) => any) => {
         plugin(this);
         return this;
-    }
-    all() {}
-    get() {}
-    post() {}
-    put() {}
-    delete() {}
-    router() {}
+    };
+
+    all: MNyxor.IRequestMethods['all'] = (path, handler) => {
+        this.addRouter('all', path, handler);
+    };
+    get: MNyxor.IRequestMethods['get'] = (path, handler) => {
+        this.addRouter('get', path, handler);
+    };
+    post: MNyxor.IRequestMethods['post'] = (path, handler) => {
+        this.addRouter('post', path, handler);
+    };
+    put: MNyxor.IRequestMethods['put'] = (path, handler) => {
+        this.addRouter('put', path, handler);
+    };
+    delete: MNyxor.IRequestMethods['delete'] = (path, handler) => {
+        this.addRouter('delete', path, handler);
+    };
+    head: MNyxor.IRequestMethods['head'] = (path, handler) => {
+        this.addRouter('head', path, handler);
+    };
+    opt: MNyxor.IRequestMethods['opt'] = (path, handler) => {
+        this.addRouter('opt', path, handler);
+    };
+
     group() {}
     ws() {}
 
-    onStart() {}
-    onRequest() {}
-    onParse() {}
-    onTransform() {}
-    onBeforeHandle() {}
-    onAfterHandle() {}
-    onAfterResponse() {}
-    onError() {}
-    onStop() {}
+    onStart = () => {};
+    onRequest = () => {};
+    onParse = () => {};
+    onTransform = () => {};
+    onBeforeHandle = () => {};
+    onAfterHandle = () => {};
+    onAfterResponse = () => {};
+    onError = () => {};
+    onStop = () => {};
 
     listen(): void;
     listen(cb: () => void): void;

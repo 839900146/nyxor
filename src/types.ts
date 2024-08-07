@@ -1,5 +1,7 @@
 import type { BunFile, Server } from 'bun';
 
+export type MaybePromise<T = any> = T | Promise<T>;
+
 export module MNyxor {
     export type TServer = Server;
 
@@ -17,7 +19,13 @@ export module MNyxor {
     }
 
     export interface IRequestMethods {
-        all: (path: string, handler: (req: any, res: any) => any) => void;
+        all: (path: string, handler: (ctx: ICtx) => any) => void;
+        get: (path: string, handler: (ctx: ICtx) => any) => void;
+        post: (path: string, handler: (ctx: ICtx) => any) => void;
+        put: (path: string, handler: (ctx: ICtx) => any) => void;
+        delete: (path: string, handler: (ctx: ICtx) => any) => void;
+        head: (path: string, handler: (ctx: ICtx) => any) => void;
+        opt: (path: string, handler: (ctx: ICtx) => any) => void;
     }
 
     export interface ICtx<
@@ -33,5 +41,20 @@ export module MNyxor {
         headers: Record<string, any> & IHeaders;
         cookies: Record<string, any> & ICookies;
         request: Request;
+    }
+
+    export interface IRouter {
+        path: string;
+        method: keyof IRequestMethods;
+        handler: (ctx: ICtx) => any;
+    }
+
+    export interface IHookContainer<T extends Function = Function> {
+        fn: T;
+    }
+
+    export interface ILifeCycles {
+        onStart?: (server: Server) => MaybePromise;
+        onStop?: () => MaybePromise;
     }
 }
