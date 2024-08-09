@@ -49,8 +49,17 @@ export class NyxorHooks {
         ...args: V
     ) => {
         let result: ReturnType<MNyxor.IHooks[K]['fn']> | undefined;
+        let format_args: unknown[] = [];
+        for (let i = 0; i < args.length; i++) {
+            if (args[i] instanceof Response) {
+                let json = await args[i].json();
+                format_args.push(json);
+            } else {
+                format_args.push(args[i]);
+            }
+        }
         for (const fn of this.events[hook]) {
-            let _result = await fn.call(null, ...args, result);
+            let _result = await fn.call(null, ...format_args, result);
             if (_result) result = _result;
         }
 
